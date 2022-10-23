@@ -6,7 +6,7 @@ assign_name_cats <- function(munic_shapes){
         mutate(name_cats = case_when(
             grepl(name, pattern = "burg") == TRUE ~ "burg",
             grepl(name, pattern = "bach") == TRUE ~ "bach",
-            #grepl(name, pattern = "berg") == TRUE ~ "berg",
+            grepl(name, pattern = "berg") == TRUE ~ "berg",
             grepl(name, pattern = "hausen") == TRUE ~ "hausen",
             grepl(name, pattern = "stadt") == TRUE ~ "stadt",
             grepl(name, pattern = "stedt") == TRUE ~ "stedt/ staedt",
