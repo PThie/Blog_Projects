@@ -30,6 +30,30 @@ read_and_prepare <- function(){
     # rename
     colnames(munic_shapes) <- c("ags", "name", "geometry")
 
+    # add state variable and rename
+    munic_shapes <- munic_shapes |>
+        mutate(
+            state = substr(ags, start = 1, stop = 2),
+            state = case_when(
+                state == "01" ~ "SH",
+                state == "02" ~ "HH",
+                state == "03" ~ "NI",
+                state == "04" ~ "HB",
+                state == "05" ~ "NW",
+                state == "06" ~ "HE",
+                state == "07" ~ "RP",
+                state == "08" ~ "BW",
+                state == "09" ~ "BY",
+                state == "10" ~ "SL",
+                state == "11" ~ "BE",
+                state == "12" ~ "BB",
+                state == "13" ~ "MV",
+                state == "14" ~ "SN",
+                state == "15" ~ "ST",
+                state == "16" ~ "TH",
+            )
+        )
+
     #--------------------------------------------------
     # save
     qsave(

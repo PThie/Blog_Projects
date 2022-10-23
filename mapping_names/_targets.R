@@ -14,20 +14,22 @@ suppressPackageStartupMessages(
     library(roxygen2)
     library(qs)
     library(ggplot2)
+    library(openxlsx)
+    library(RColorBrewer)
   }
 )
 
 #--------------------------------------------------
 # set working directory
 
-setwd(here())
+setwd(here("mapping_names"))
 
 #--------------------------------------------------
 # define paths
 
-data_path <- here("data")
-output_path <- here("output")
-code_path <- here("code")
+data_path <- here("mapping_names/data")
+output_path <- here("mapping_names/output")
+code_path <- here("mapping_names/code")
 
 #--------------------------------------------------
 # targets settings
@@ -56,6 +58,10 @@ rlang::list2(
   tar_target(
     assigning_names,
     assign_name_cats(munic_shapes)
+  ),
+  tar_target(
+    plotting_munic_names,
+    plot_munic_names(assigning_names)
   )
 )
 
