@@ -64,7 +64,7 @@ for place in places:
             tagged_data["snap_year"] = year
 
             # export data
-            filename = str(place) + "_" + "extracted_data_" + str(year) + "_" + str(city) + ".csv"
+            filename = str(place) + "_" + str(year) + "_" + str(city) + ".csv"
             path = join(data_path, place)
             tagged_data.to_csv(join(path, filename))
 
