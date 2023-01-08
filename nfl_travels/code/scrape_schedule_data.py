@@ -12,7 +12,7 @@ import numpy as np
 #--------------------------------------------------
 # paths
 
-main_path = r"D:\Blog_Projects\nfl_travels"
+main_path = r"G:\Blog_Projects\nfl_travels"
 data_path = main_path + r"\data"
 
 # set directory
@@ -66,8 +66,8 @@ game_schedule = game_schedule[~game_schedule.away_team.str.contains("\xa0")]
 # export
 
 game_schedule.to_csv(
-   path_or_buf = os.path.join(data_path, "game_schedule.csv"),
-   sep = ";",
-   index = False,
-   na_rep = np.nan
+    path_or_buf = os.path.join(data_path, "game_schedule.csv"),
+    sep = ";",
+    index = False,
+    na_rep = np.nan
 )
