@@ -1,3 +1,7 @@
+# for references: 
+# https://www.nbcsports.com/chicago/bears/which-nfl-teams-will-travel-most-least-2022
+# https://www.cbssports.com/nfl/news/heres-how-far-each-nfl-team-will-travel-in-2022-steelers-get-huge-advantage-buccaneers-face-brutal-slate/
+
 #--------------------------------------------------
 # import libraries
 

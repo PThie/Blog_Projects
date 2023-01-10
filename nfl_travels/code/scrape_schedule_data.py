@@ -1,5 +1,3 @@
-# for references: https://www.nbcsports.com/chicago/bears/which-nfl-teams-will-travel-most-least-2022
-
 #--------------------------------------------------
 # import libraries
 
