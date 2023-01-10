@@ -10,7 +10,7 @@ import numpy as np
 #--------------------------------------------------
 # paths
 
-main_path = r"G:\Blog_Projects\nfl_travels"
+main_path = r"D:\Blog_Projects\nfl_travels"
 data_path = main_path + r"\data"
 
 # set directory
@@ -72,7 +72,8 @@ loct = Nominatim(user_agent = "GetLoc")
 arena_locs = locations["arena_location"].values
 
 # list for storage
-coords = []
+lats = []
+lons = []
 
 # loop through all locations
 for arena_loc in arena_locs:
@@ -81,12 +82,13 @@ for arena_loc in arena_locs:
     # get longitude and latitude
     lon = loc_name.longitude
     lat = loc_name.latitude
-    coord = [lat, lon]
     # store coords
-    coords.append(coord)
+    lats.append(lat)
+    lons.append(lon)
     
 # assing to location data
-locations["coords"] = coords
+locations["lat"] = lats
+locations["lon"] = lons
 
 #--------------------------------------------------
 # merge location data to schedule based on away team
@@ -102,7 +104,8 @@ away_location = pd.merge(
 away_location.rename(
     columns = {
         "arena_location" : "loc_away_team",
-        "coords" : "coords_away_team"
+        "lat" : "lat_away_team",
+        "lon" : "lon_away_team"
     },
     inplace = True
 )
@@ -127,7 +130,8 @@ schedule_locations = pd.merge(
 schedule_locations.rename(
     columns = {
         "arena_location" : "loc_home_team",
-        "coords" : "coords_home_team"
+        "lat" : "lat_home_team",
+        "lon" : "lon_home_team"
     },
     inplace = True
 )
@@ -150,7 +154,8 @@ outside_us["loc_home_team"] = outside_us["home_team"].str.extract(".*\((.*)\).*"
 
 # get coords for those locations
 arena_locs = outside_us["loc_home_team"].values
-coords = []
+lats = []
+lons = []
 
 # loop through all locations
 for arena_loc in arena_locs:
@@ -159,12 +164,13 @@ for arena_loc in arena_locs:
     # get longitude and latitude
     lon = loc_name.longitude
     lat = loc_name.latitude
-    coord = [lat, lon]
     # store coords
-    coords.append(coord)
-    
+    lats.append(lat)
+    lons.append(lon)
+        
 # assing to location data
-outside_us["coords_home_team"] = coords
+outside_us["lat_home_team"] = lats
+outside_us["lon_home_team"] = lons
 
 # bring together with the rest of the data
 schedule_locations = pd.concat(
@@ -189,5 +195,6 @@ schedule_locations = schedule_locations[away_cols + home_cols]
 schedule_locations.to_csv(
     join(data_path, "schedule_locations.csv"),
     sep = ";",
+    index = False,
     na_rep = np.nan
 )
