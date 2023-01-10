@@ -81,7 +81,7 @@ for arena_loc in arena_locs:
     # get longitude and latitude
     lon = loc_name.longitude
     lat = loc_name.latitude
-    coord = [lon, lat]
+    coord = [lat, lon]
     # store coords
     coords.append(coord)
     
@@ -159,7 +159,7 @@ for arena_loc in arena_locs:
     # get longitude and latitude
     lon = loc_name.longitude
     lat = loc_name.latitude
-    coord = [lon, lat]
+    coord = [lat, lon]
     # store coords
     coords.append(coord)
     
