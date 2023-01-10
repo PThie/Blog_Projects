@@ -4,6 +4,8 @@
 import pandas as pd
 import os
 from os.path import join
+from geopy.geocoders import Nominatim
+import numpy as np
 
 #--------------------------------------------------
 # paths
@@ -40,7 +42,8 @@ locations["team_name"] = locations["team_name"].replace(
 locations["team_name_short"] = locations["team_name"].str.split(" ").str[-1]
 
 # remove white spaces
-schedule["away_team"] = schedule["away_team"].str.rstrip()
+schedule["away_team"] = schedule["away_team"].str.strip()
+schedule["home_team"] = schedule["home_team"].str.strip()
 
 # check if all names match between both data sets
 unique_loc_names = sorted(locations["team_name_short"].unique())
@@ -60,47 +63,131 @@ locations.drop(
 )
 
 #--------------------------------------------------
-# merge both data sets based on team name (short)
+# find coordinates for each location
 
-# define function for merge
-# depending on whether you want to merge based on away or home
-def merge_data(away_home):
-    # implement a check whether its the correct value entry
-    valid_values = ["away_team", "home_team"]
-    if away_home not in valid_values:
-        raise ValueError("Wrong entry for away_home!")
-    
-    # merge based on entry
-    schedule_locations = pd.merge(
-        schedule,
-        locations,
-        left_on = away_home,
-        right_on = "team_name_short"
-    )
-    
-    # make sure number of rows did not change
-    if len(schedule_locations.index) != len(schedule.index):
-        print("CAUTION: Number of rows changed after merge!") 
-    
-    # rename arena location
-    col_name = "loc_" + away_home
-    schedule_locations.rename(
-        columns = {
-            "arena_location" : col_name
-        },
-        inplace = True
-    )
-    
-    # drop short name
-    schedule_locations.drop(
-        columns = "team_name_short",
-        inplace = True
-    )
-    
-    return schedule_locations
+# calling Nominatim tool
+loct = Nominatim(user_agent = "GetLoc")
 
-# apply function depending on whether to look at away or home team
-away_data = merge_data(away_home = "away_team")
-home_data = merge_data(away_home = "home_team")
+# get each location as value
+arena_locs = locations["arena_location"].values
 
-# bring both together
+# list for storage
+coords = []
+
+# loop through all locations
+for arena_loc in arena_locs:
+    # complete location name
+    loc_name = loct.geocode(arena_loc)
+    # get longitude and latitude
+    lon = loc_name.longitude
+    lat = loc_name.latitude
+    coord = [lon, lat]
+    # store coords
+    coords.append(coord)
+    
+# assing to location data
+locations["coords"] = coords
+
+#--------------------------------------------------
+# merge location data to schedule based on away team
+
+away_location = pd.merge(
+    schedule,
+    locations,
+    left_on = "away_team",
+    right_on = "team_name_short"
+)
+
+# rename columns
+away_location.rename(
+    columns = {
+        "arena_location" : "loc_away_team",
+        "coords" : "coords_away_team"
+    },
+    inplace = True
+)
+
+# drop columns
+away_location.drop(
+    columns = "team_name_short",
+    inplace = True
+)
+
+#--------------------------------------------------
+# merge location data based on home team
+
+schedule_locations = pd.merge(
+    away_location,
+    locations,
+    left_on = "home_team",
+    right_on = "team_name_short"
+)
+
+# do renaming and cleaning
+schedule_locations.rename(
+    columns = {
+        "arena_location" : "loc_home_team",
+        "coords" : "coords_home_team"
+    },
+    inplace = True
+)
+
+schedule_locations.drop(
+    columns = "team_name_short",
+    inplace = True
+)
+
+#--------------------------------------------------
+# sometime matches are played outside the US
+# find the location for those
+
+outside_us = away_location[
+    away_location["home_team"].str.contains("London|Munich|Mexico")
+]
+
+# get clean location names
+outside_us["loc_home_team"] = outside_us["home_team"].str.extract(".*\((.*)\).*")
+
+# get coords for those locations
+arena_locs = outside_us["loc_home_team"].values
+coords = []
+
+# loop through all locations
+for arena_loc in arena_locs:
+    # complete location name
+    loc_name = loct.geocode(arena_loc)
+    # get longitude and latitude
+    lon = loc_name.longitude
+    lat = loc_name.latitude
+    coord = [lon, lat]
+    # store coords
+    coords.append(coord)
+    
+# assing to location data
+outside_us["coords_home_team"] = coords
+
+# bring together with the rest of the data
+schedule_locations = pd.concat(
+    [schedule_locations, outside_us],
+    ignore_index = True
+)
+
+#--------------------------------------------------
+# do some restructuring to make it nicer
+
+# get column names for away and home variables
+cols = schedule_locations.columns.values
+away_cols = [x for x in cols if "away" in x]
+home_cols = [x for x in cols if "home" in x]
+
+# assign new column order
+schedule_locations = schedule_locations[away_cols + home_cols]
+
+#--------------------------------------------------
+# export
+
+schedule_locations.to_csv(
+    join(data_path, "schedule_locations.csv"),
+    sep = ";",
+    na_rep = np.nan
+)
